@@ -1,0 +1,32 @@
+{
+    "docker-project": {
+        "projects": [
+            {
+                "name": "surveyking",
+                "path": "docker"
+            }
+        ]
+    },
+    "data-share": {
+        "shares": [
+            {
+                "name": "mysql",
+                "permission": {
+                    "rw": ["surveyking"]
+                }
+            },
+            {
+                "name": "files",
+                "permission": {
+                    "rw": ["surveyking"]
+                }
+            },
+            {
+                "name": "logs",
+                "permission": {
+                    "rw": ["surveyking"]
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# 检查Docker是否可用
+if ! command -v docker >/dev/null 2>&1; then
+    echo "错误: 未检测到Docker，请先安装Docker" > "${TRIM_TEMP_LOGFILE}"
+    exit 1
+fi
+
+# 检查docker-compose是否可用
+if ! command -v docker-compose >/dev/null 2>&1 && ! docker compose version >/dev/null 2>&1; then
+    echo "错误: 未检测到docker-compose，请先安装docker-compose" > "${TRIM_TEMP_LOGFILE}"
+    exit 1
+fi
+
+# 检查系统资源
+if [ -f /proc/meminfo ]; then
+    local total_memory
+    total_memory=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    if [ "$total_memory" -lt 2097152 ]; then  # 2GB in KB
+        echo "警告: 系统内存可能不足，建议至少2GB内存"
+    fi
+fi
+
+# 检查磁盘空间
+local available_space
+available_space=$(df /var | awk 'NR==2 {print $4}')
+if [ "$available_space" -lt 5242880 ]; then  # 5GB in KB
+    echo "警告: 磁盘空间可能不足，建议至少预留5GB空间"
+fi
+
+# 验证配置参数
+if [ -n "$wizard_mysql_password" ]; then
+    if [ ${#wizard_mysql_password} -lt 8 ]; then
+        echo "错误: 数据库密码长度至少8位" > "${TRIM_TEMP_LOGFILE}"
+        exit 1
+    fi
+fi
+
+echo "安装前检查完成"
+exit 0

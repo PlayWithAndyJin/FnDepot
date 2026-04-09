@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# 检查应用是否正在运行
+is_app_running() {
+    # 检查Docker容器状态
+    if docker ps --format '{{.Names}}' | grep -q "^surveyking-app$"; then
+        # 检查应用端口是否响应
+        if curl -fsS "http://localhost:1991" >/dev/null 2>&1; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# 启动应用
+do_start() {
+    echo "启动卷王问卷应用..."
+    
+    # 检查Docker是否可用
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "错误: Docker未安装或不可用" > "${TRIM_TEMP_LOGFILE}"
+        exit 1
+    fi
+    
+    # 进入应用目录
+    cd "${TRIM_APPDEST}" || {
+        echo "错误: 无法进入应用目录 ${TRIM_APPDEST}" > "${TRIM_TEMP_LOGFILE}"
+        exit 1
+    }
+    
+    # 启动Docker Compose
+    if [ -f "docker/docker-compose.yaml" ]; then
+        cd docker
+        if docker compose up -d; then
+            echo "应用启动命令已执行"
+            # 等待应用启动完成
+            sleep 30
+            exit 0
+        else
+            echo "错误: Docker Compose启动失败" > "${TRIM_TEMP_LOGFILE}"
+            exit 1
+        fi
+    else
+        echo "错误: 未找到docker-compose.yaml文件" > "${TRIM_TEMP_LOGFILE}"
+        exit 1
+    fi
+}
+
+# 停止应用
+do_stop() {
+    echo "停止卷王问卷应用..."
+    
+    # 进入应用目录
+    cd "${TRIM_APPDEST}" || {
+        echo "警告: 无法进入应用目录 ${TRIM_APPDEST}"
+        exit 0
+    }
+    
+    # 停止Docker Compose
+    if [ -f "docker/docker-compose.yaml" ]; then
+        cd docker
+        docker compose down
+    fi
+    
+    # 强制停止相关容器
+    docker stop surveyking-app 2>/dev/null || true
+    docker rm surveyking-app 2>/dev/null || true
+    
+    exit 0
+}
+
+# 检查状态
+do_status() {
+    if is_app_running; then
+        echo "应用正在运行"
+        exit 0
+    else
+        echo "应用未运行"
+        exit 3
+    fi
+}
+
+# 主程序入口
+case "$1" in
+    start)
+        do_start
+        ;;
+    stop)
+        do_stop
+        ;;
+    status)
+        do_status
+        ;;
+    *)
+        echo "用法: $0 {start|stop|status}" > "${TRIM_TEMP_LOGFILE}"
+        exit 1
+        ;;
+esac

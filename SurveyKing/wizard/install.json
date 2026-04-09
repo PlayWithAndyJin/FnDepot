@@ -1,0 +1,49 @@
+[
+    {
+        "stepTitle": "欢迎安装卷王问卷",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "欢迎使用卷王问卷系统！这是一款专业的在线问卷调查平台，支持多种题型和数据分析功能。"
+            },
+            {
+                "type": "tips",
+                "helpText": "安装过程需要几分钟时间，请耐心等待。"
+            }
+        ]
+    },
+    {
+        "stepTitle": "基础配置",
+        "items": [
+            {
+                "type": "password",
+                "field": "wizard_mysql_password",
+                "label": "数据库密码",
+                "initValue": "surveyking",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入数据库密码"
+                    },
+                    {
+                        "min": 8,
+                        "message": "密码长度不能少于8位"
+                    }
+                ]
+            },
+            {
+                "type": "tips",
+                "helpText": "此密码将用于MySQL数据库的root用户，请妥善保管。"
+            }
+        ]
+    },
+    {
+        "stepTitle": "确认安装",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "请确认以上配置信息，点击'安装'开始部署卷王问卷系统。"
+            }
+        ]
+    }
+]
